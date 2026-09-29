@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Writing eval explorer</title>
+<style>
+:root{color-scheme:light;--ink:#192c31;--muted:#64757a;--line:#d8e1df;--paper:#f4f6f3;--green:#17685c;--red:#9e3f2d;--warm:#fff0df}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.45 system-ui,sans-serif}button,input,select{font:inherit}button,select{cursor:pointer}button{color:inherit;background:white;border:1px solid var(--line);border-radius:7px;padding:6px 10px}button:hover{border-color:var(--green)}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #238675;outline-offset:2px}button:disabled{cursor:default;opacity:.4}h1,h2,h3,p{margin:0}h1{font-size:27px;letter-spacing:-1px}h2{font-size:21px;line-height:1.25}h3{font-size:14px}small,.muted{color:var(--muted)}a{color:var(--green)}kbd{font:11px ui-monospace,monospace;border:1px solid var(--line);border-bottom-width:2px;padding:1px 4px;border-radius:4px;background:white}header{padding:20px 26px 12px;display:flex;gap:20px;justify-content:space-between;align-items:center}.eyebrow{text-transform:uppercase;letter-spacing:1.8px;font-size:10px;font-weight:700;color:var(--green);margin-bottom:4px}.topnote{max-width:560px;text-align:right;font-size:12px;color:var(--muted)}.toolbar{padding:0 26px 14px;display:flex;flex-wrap:wrap;align-items:center;gap:10px}.toolbar input,.toolbar select{padding:7px 10px;border:1px solid var(--line);border-radius:6px;background:white;color:var(--ink)}#search{min-width:250px}.overview{margin:0 26px 16px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:20px}.panel{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px}.sectiontop{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px}.histogram{height:114px;display:flex;gap:4px;align-items:stretch}.bin{flex:1;min-width:0;border:0;border-radius:4px;background:transparent;padding:0 1px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:3px;font-size:10px}.bin .bar{width:100%;min-height:2px;background:#adcac0;border-radius:3px 3px 0 0}.bin[aria-pressed=true]{background:#e6efeb;outline:2px solid var(--green)}.bin[aria-pressed=true] .bar{background:var(--green)}.bin .count{font-variant-numeric:tabular-nums;color:var(--muted)}.workspace{display:grid;grid-template-columns:300px minmax(450px,1fr) 275px;border-top:1px solid var(--line);height:calc(100vh - 327px);min-height:430px}.column{overflow:auto;padding:16px;border-right:1px solid var(--line)}.column:last-child{border:0}#reader{background:white;padding:20px 28px}.doc{display:block;width:100%;text-align:left;border:1px solid transparent;background:transparent;margin-bottom:5px;padding:9px}.doc[aria-current=true]{background:white;border-color:var(--green);box-shadow:0 2px 6px #17372b0a}.doc .title{font-size:13px;font-weight:600;display:block;margin-right:40px}.doc .score{float:right;font:600 13px ui-monospace,monospace;color:var(--green)}.doc small{display:block;margin-top:4px;font-size:11px}.tag{background:var(--warm);color:var(--red);font-size:11px;padding:3px 6px;border-radius:4px}.reader-meta{margin:8px 0 16px;font-size:12px;color:var(--muted);overflow-wrap:anywhere}.finding{border-left:3px solid #d4a477;padding:9px 12px;margin:9px 0;background:#fffaf3}.finding.selected{border-left-color:var(--red);background:var(--warm);outline:1px solid #e4bea0}.finding .quote{white-space:pre-wrap;margin-top:7px;line-height:1.6;font-size:14px}.finding .reason{font-size:12px;color:var(--muted);margin-top:3px}.finding button{font-size:11px;margin-top:7px}.rule{display:block;width:100%;text-align:left;background:transparent;border:0;padding:8px 0}.rule.active{background:#e0eee7;border-radius:4px;padding:8px}.rule .label{display:flex;justify-content:space-between;gap:5px;font-size:11px}.track{height:4px;background:#e3e9e5;margin-top:5px;border-radius:3px}.fill{height:100%;background:#97b6ab;border-radius:3px}.rule.active .fill{background:var(--green)}#rule-note{font-size:11px;color:var(--muted);margin:10px 0}.reading-block{padding:8px 10px;line-height:1.65;white-space:pre-wrap;border-left:3px solid transparent;scroll-margin-top:20px;overflow-wrap:anywhere}.reading-block.flagged{background:#fff5e8;border-left-color:#d4a477}.reading-block h3{font-size:17px}.reader-tabs{display:flex;gap:7px;margin-bottom:14px}.reader-tabs button[aria-pressed=true]{background:var(--ink);color:white}.empty{padding:25px 0;color:var(--muted)}#status{font-size:12px;color:var(--muted)}dialog{max-width:500px;border:1px solid var(--line);border-radius:12px;padding:24px;box-shadow:0 20px 80px #0003}dialog::backdrop{background:#12231f55}dialog p{margin:12px 0}.shortcut{display:flex;justify-content:space-between;margin:10px 0}footer{padding:8px 26px;font-size:11px;color:var(--muted);border-top:1px solid var(--line)}@media(max-width:1100px){.workspace{grid-template-columns:235px minmax(350px,1fr)}#rules-panel{grid-column:1/-1;max-height:250px;border-top:1px solid var(--line)}.workspace{height:auto}.column{max-height:65vh}.topnote{max-width:380px}}@media(max-width:700px){header{align-items:start}.topnote{display:none}.overview{grid-template-columns:1fr}.workspace{grid-template-columns:1fr}.column{max-height:45vh}#reader{max-height:75vh}.toolbar input{width:100%}header,.toolbar{padding-left:16px;padding-right:16px}.overview{margin-left:16px;margin-right:16px}}
+#collection{position:relative}#collection summary{cursor:pointer;background:white;border:1px solid var(--line);border-radius:6px;padding:7px 10px}.collection-menu{position:absolute;top:100%;left:0;z-index:5;min-width:290px;background:white;padding:12px;border:1px solid var(--line);border-radius:6px;box-shadow:0 8px 24px #0002}.collection-actions{display:flex;gap:4px;margin-bottom:8px}.collection-actions button{font-size:11px}#group-options label{display:flex;gap:8px;padding:5px;cursor:pointer}#group-options input{width:auto}.failure-label{font-size:11px;color:var(--red);line-height:1.4;margin-bottom:5px;white-space:normal}.rule-mode{font-size:10px;color:var(--green)}
+#comparison{height:114px;overflow:auto;scrollbar-gutter:stable;scroll-snap-type:y mandatory;overscroll-behavior-y:contain}.comparison-axis,.comparison-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(80px,.8fr) 76px;align-items:center;gap:12px}.comparison-axis{font-size:10px;color:var(--muted);padding:0 7px 4px;padding-right:22px}.rate-axis{display:flex;justify-content:space-between}.comparison-row{scroll-snap-align:start;scroll-snap-stop:always;width:100%;border:0;text-align:left;padding:6px 7px;border-radius:4px;font-size:11px}.comparison-row[aria-pressed=true]{background:#e0eee7}.check-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rate-track{position:relative;height:15px;margin:0 4px;background:linear-gradient(var(--line),var(--line)) center/100% 1px no-repeat}.rate-dot{position:absolute;left:var(--rate);width:12px;height:12px;transform:translateX(-50%)}.type-marker{display:inline-block;width:12px;height:12px;flex-shrink:0;vertical-align:middle}#comparison-legend{display:block}.marker-family{display:flex;align-items:center;flex-wrap:wrap;gap:5px 10px;margin:5px 0}.marker-family strong{min-width:100px;font-size:10px}.marker-family span{white-space:nowrap}.rate-values{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}.comparison-empty{font-size:12px;color:var(--muted);padding:15px 7px}
+</style>
+<style>
+.bin .bar{display:flex;flex-direction:column-reverse;overflow:hidden;background:transparent}
+.bin[aria-pressed=true] .bar{background:transparent}
+.stack-reference{background:#287b73;width:100%}.stack-rest{background:#e5b472;width:100%}
+.legend{display:flex;flex-wrap:wrap;gap:12px;color:var(--muted);font-size:11px;margin:4px 0 8px}
+.legend span{display:inline-flex;align-items:center;gap:5px}.legend i{width:9px;height:9px;border-radius:2px;display:inline-block}
+</style>
+<header><div><div class="eyebrow">Local writing review</div><h1>Find the friction.</h1></div><div class="topnote">Score = checks passed out of <span class="check-count"></span>, with equal weight.<br>These are style checks, not a measure of writing quality. Short pages have fewer opportunities to fail.</div></header>
+<div class="toolbar">
+ <input id="search" type="search" aria-label="Search title or path" placeholder="Search title or path…  /">
+ <details id="collection"><summary id="collection-label">All document types</summary><div class="collection-menu"><div class="collection-actions"><button id="groups-all">All</button><button id="groups-none">None</button><button id="groups-references">References</button><button id="groups-own">Our writing</button></div><div id="group-options"></div></div></details>
+ <select id="length" aria-label="Document length"><option value="0">All lengths</option><option value="100">100+ words</option><option value="300">300+ words</option><option value="600">600+ words</option><option value="100-1000">100–1,000 words</option></select>
+ <button id="reset">Reset filters</button><button id="help">Shortcuts <kbd>?</kbd></button><span id="status" role="status" aria-live="polite"></span>
+</div>
+<section class="overview">
+ <div class="panel"><div class="sectiontop"><h3>Score distribution</h3><button id="all-scores">All scores</button></div><div id="legend" class="legend"></div><div class="histogram" id="histogram" aria-label="Filter by checks passed"></div><small><kbd>←</kbd> <kbd>→</kbd> jump between occupied scores · <kbd>↓</kbd> <kbd>↑</kbd> or <kbd>j</kbd> <kbd>k</kbd> browse documents</small></div>
+ <div class="panel"><div class="sectiontop"><h3>Pass rate by document type</h3><small><span class="check-count"></span> checks · highest variance first</small></div><div id="comparison-legend" class="legend"></div><div class="comparison-axis"><span>Check</span><span class="rate-axis"><span>0%</span><span>50%</span><span>100%</span></span><span>Variance (pp²)</span></div><div id="comparison" aria-label="Pass rates by check"></div><small>Scroll for all checks · Click: failures · Double-click: passes.</small></div>
+</section>
+<main class="workspace">
+ <nav class="column" aria-label="Documents"><div class="sectiontop"><h3 id="list-label">Documents</h3><small>lowest score first</small></div><div id="documents"></div></nav>
+ <article class="column" id="reader" aria-label="Selected document"></article>
+ <aside class="column" id="rules-panel"><div class="sectiontop"><h3>Most common failures</h3><button id="clear-rule" hidden>Clear</button></div><p id="rule-note">Click a rule to find documents failing it.</p><div id="rules"></div></aside>
+</main>
+<footer id="footer"></footer>
+<dialog id="shortcuts"><h2>Move through the corpus</h2><div class="shortcut"><span>Next / previous document</span><span><kbd>↓</kbd> <kbd>↑</kbd> or <kbd>j</kbd> <kbd>k</kbd></span></div><div class="shortcut"><span>Next / previous occupied score</span><span><kbd>→</kbd> <kbd>←</kbd></span></div><div class="shortcut"><span>Next / previous failing excerpt</span><span><kbd>]</kbd> <kbd>[</kbd></span></div><div class="shortcut"><span>Switch excerpts / reading view</span><kbd>v</kbd></div><div class="shortcut"><span>Search</span><kbd>/</kbd></div><div class="shortcut"><span>Reset filters / close help</span><kbd>Esc</kbd></div><p>Click a score bar or rule to narrow the list. Double-click a rule to show documents that pass it. Highlighted passages in reading view have findings. Scores count each failed rule once, even when it has several findings.</p><button id="close-help">Close</button></dialog>
+<script type="application/json" id="data">__WRITING_DATA__</script>
+<script>
+'use strict';
+const data=JSON.parse(document.getElementById('data').textContent);
+const ruleCount=Object.keys(data.rules).length;
+document.querySelectorAll(".check-count").forEach(el=>el.textContent=ruleCount);
+const $=id=>document.getElementById(id);
+const esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const state={score:null,rule:null,negate:false,selected:null,finding:0,view:'findings'};
+let base=[],shown=[];
+const median=xs=>{const a=[...xs].sort((a,b)=>a-b),n=a.length;return n?(a[Math.floor(n/2)]+a[Math.ceil(n/2)-1])/2:0};
+const percent=(n,d)=>d?Math.round(100*n/d):0;
+const button=(text,fn,cls='')=>{const b=document.createElement('button');b.className=cls;b.innerHTML=text;b.onclick=fn;return b};
+function selectDoc(path){state.selected=path;state.finding=0;renderList();renderReader();document.querySelector('.doc[aria-current=true]')?.scrollIntoView({block:'nearest'});$('reader').scrollTop=0;}
+function render(){
+ const q=$('search').value.toLowerCase(),groups=[...document.querySelectorAll('#group-options input:checked')].map(el=>el.value),range=$('length').value.split('-').map(Number),min=range[0],max=range[1]??Infinity;
+ base=data.documents.filter(d=>groups.includes(d.group)&&d.words>=min&&d.words<=max&&(!q||(d.title+' '+d.path).toLowerCase().includes(q)));
+ shown=base.filter(d=>(state.score===null||d.score===state.score)&&(matchesRule(d))).sort((a,b)=>a.score-b.score||a.title.localeCompare(b.title));
+ if(!shown.some(d=>d.path===state.selected)){state.selected=shown[0]?.path??null;state.finding=0;}
+ $('status').textContent=`${shown.length} of ${base.length} documents · median ${median(base.map(d=>d.score))}/${ruleCount}`;
+ renderHistogram();renderRules();renderComparison();renderList();renderReader();
+}
+function renderHistogram(){
+ const hist=Array.from({length:ruleCount+1},()=>({reference:0,rest:0}));base.filter(d=>matchesRule(d)).forEach(d=>hist[d.score][d.reference?'reference':'rest']++);const max=Math.max(1,...hist.map(h=>h.reference+h.rest));$('histogram').replaceChildren();
+ const reference=hist.reduce((n,h)=>n+h.reference,0),rest=hist.reduce((n,h)=>n+h.rest,0);
+ $('legend').innerHTML=`<span title="Stripe, Django, GOV.UK and Chrome documentation"><i class="stack-reference"></i>Reference writing · ${reference}</span><span title="Our articles, primers, technical notes and indexes"><i class="stack-rest"></i>The rest · ${rest}</span>`;
+ hist.forEach(({reference,rest},score)=>{const n=reference+rest,label=`${score} of ${ruleCount}: ${reference} reference, ${rest} other (${n} total)`;const b=button(`<span class="count">${n||''}</span><span class="bar" style="height:${n?74*n/max:0}px"><span class="stack-reference" style="height:${n?100*reference/n:0}%"></span><span class="stack-rest" style="height:${n?100*rest/n:0}%"></span></span><span>${score}</span>`,()=>{state.score=state.score===score?null:score;render()},'bin');b.disabled=!n;b.title=label;b.setAttribute('aria-pressed',String(state.score===score));b.setAttribute('aria-label',label);$('histogram').append(b)});
+ $('all-scores').textContent=state.score===null?'All scores':`Clear ${state.score}/${ruleCount} filter`;
+}
+function matchesRule(d){return state.rule===null||(state.negate?!d.failed.includes(state.rule):d.failed.includes(state.rule))}
+function renderRules(){
+ $('clear-rule').hidden=state.rule===null;
+ $('rule-note').textContent=state.rule===null?'Click to show failures; double-click to show passes. Rates use the document type, length and search filters.':`Showing documents that ${state.negate?'pass':'fail'} check ${state.rule}. Double-click a rule to show passes.`;
+ const counts=Object.keys(data.rules).map(Number).map(id=>({id,n:base.filter(d=>d.failed.includes(id)).length})).sort((a,b)=>b.n-a.n||a.id-b.id);
+ const signature=JSON.stringify([base.length,counts]);
+ // Keep buttons mounted while filtering so the browser can deliver a double-click.
+ if($('rules').dataset.signature!==signature){
+  $('rules').dataset.signature=signature;$('rules').replaceChildren();
+  counts.forEach(({id,n})=>{const b=button(`<span class="label"><span>${id}. ${esc(data.rules[id])}</span><strong>${n}/${base.length}</strong></span><small class="rule-mode"></small><div class="track"><div class="fill" style="width:${percent(n,base.length)}%"></div></div>`,()=>{state.rule=state.rule===id&&!state.negate?null:id;state.negate=false;state.score=null;render()},'rule');b.dataset.rule=id;b.title='Click: fails this check. Double-click: passes this check.';b.ondblclick=()=>{state.rule=id;state.negate=true;state.score=null;render()};$('rules').append(b)});
+ }
+ for(const b of $('rules').children){const active=+b.dataset.rule===state.rule;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));b.querySelector('.rule-mode').textContent=active?(state.negate?'Showing passes':'Showing failures'):'';}
+}
+function renderComparison(){
+ // Shape identifies the type; fill and color identify the reference/local family.
+ const types=[['Stripe',true,0],['Django',true,1],['GOV.UK',true,2],['Chrome',true,3],['Articles',false,0],['Primers',false,1],['Notes',false,2],['Indexes',false,3]];
+ const shapes=['<circle cx="8" cy="8" r="5"/>','<rect x="3" y="3" width="10" height="10"/>','<path d="M8 2 14 13H2Z"/>','<path d="M8 1.5 14.5 8 8 14.5 1.5 8Z"/>'];
+ const marker=g=>`<svg class="type-marker" viewBox="0 0 16 16" fill="${g.reference?g.color:'white'}" stroke="${g.color}" stroke-width="${g.reference?1:2}" stroke-linejoin="round" aria-hidden="true">${shapes[g.shape]}</svg>`;
+ const selected=new Set([...document.querySelectorAll('#group-options input:checked')].map(el=>el.value));
+ const groups=types.filter(([name])=>selected.has(name)).map(([name,reference,shape])=>({name,reference,shape,color:reference?'#17685c':'#a65316',docs:base.filter(d=>d.group===name)}));
+ $('comparison-legend').innerHTML=[true,false].map(reference=>{const family=groups.filter(g=>g.reference===reference);return family.length?`<div class="marker-family"><strong>${reference?'Reference · filled':'Ours · hollow'}</strong>${family.map(g=>`<span>${marker(g)}${esc(g.name)} · ${g.docs.length}</span>`).join('')}</div>`:''}).join('');
+ // Separate lanes keep coincident rates legible, including multiple 100% scores.
+ const referenceCount=groups.filter(g=>g.reference).length,familyGap=referenceCount&&referenceCount<groups.length?6:0;
+ const lane=i=>i*12+(i>=referenceCount?familyGap:0);
+ const rows=Object.keys(data.rules).map(Number).map(id=>{const counts=groups.map(g=>g.docs.filter(d=>!d.failed.includes(id)).length),rates=counts.map((n,i)=>groups[i].docs.length?100*n/groups[i].docs.length:null),available=rates.filter(r=>r!==null),mean=available.reduce((sum,r)=>sum+r,0)/available.length,variance=available.length?available.reduce((sum,r)=>sum+(r-mean)**2,0)/available.length:null;return{id,counts,rates,variance}}).sort((a,b)=>(b.variance??-1)-(a.variance??-1)||a.id-b.id);
+ const signature=JSON.stringify([groups.map(g=>[g.name,g.docs.length]),rows]);
+ if($('comparison').dataset.signature!==signature){
+  $('comparison').dataset.signature=signature;$('comparison').replaceChildren();
+  if(!base.length)$('comparison').innerHTML='<p class="comparison-empty">No documents match these filters.</p>';
+  else rows.forEach(({id,counts,rates,variance})=>{
+   const description=`${id}. ${data.rules[id]}. Variance: ${variance.toFixed(1)} pp² (equal weight per nonempty type). `+groups.map((g,i)=>`${g.name}: ${rates[i]===null?'no documents':Math.round(rates[i])+'%'} (${counts[i]}/${g.docs.length})`).join('; ');
+   const dots=rates.map((rate,i)=>rate===null?'':`<span class="rate-dot" data-group="${esc(groups[i].name)}" data-shape="${groups[i].shape}" data-family="${groups[i].reference?'reference':'ours'}" style="--rate:${rate}%;top:${lane(i)}px">${marker(groups[i])}</span>`).join('');
+   const b=button(`<span class="check-name">${id}. ${esc(data.rules[id])}</span><span class="rate-track" style="height:${Math.max(14,groups.length*12+familyGap)}px" aria-hidden="true">${dots}</span><span class="rate-values">${variance===null?'—':variance.toFixed(1)}</span>`,()=>{state.rule=state.rule===id&&!state.negate?null:id;state.negate=false;state.score=null;render()},'comparison-row');
+   b.dataset.check=id;b.setAttribute('aria-label',description+'. Click to show failures; double-click to show passes.');b.ondblclick=()=>{state.rule=id;state.negate=true;state.score=null;render()};$('comparison').append(b);
+  });
+ }
+ for(const b of $('comparison').querySelectorAll('.comparison-row'))b.setAttribute('aria-pressed',String(+b.dataset.check===state.rule));
+}
+function renderList(){
+ $('list-label').textContent=state.score===null?'Documents':`${state.score}/${ruleCount} documents`;$('documents').replaceChildren();
+ if(!shown.length){$('documents').innerHTML='<p class="empty">No matches. Clear the score or rule filter, or press Esc.</p>';return;}
+ shown.forEach(d=>{const b=button(`<span class="score">${d.score}/${ruleCount}</span><span class="title">${esc(d.title)}</span><small>${esc(d.group)} · ${d.words} words · ${d.findings.length} findings</small>`,()=>selectDoc(d.path),'doc');b.setAttribute('aria-current',String(d.path===state.selected));$('documents').append(b)});
+}
+function activeFindings(d){return d.findings.filter(f=>state.rule===null||f.rule===state.rule)}
+function renderReader(){
+ const d=shown.find(d=>d.path===state.selected),panel=$('reader');
+ if(!d){panel.innerHTML='<h2>No document selected</h2><p class="empty">Choose another score or reset filters.</p>';return;}
+ const findings=activeFindings(d);state.finding=Math.min(state.finding,Math.max(0,findings.length-1));
+ const original=d.source_url&&/^https?:\/\//.test(d.source_url)?` · <a href="${esc(d.source_url)}" target="_blank" rel="noopener">Original page</a>`:'';
+ panel.innerHTML=`<div class="sectiontop"><span class="eyebrow">${esc(d.group)}</span><span class="tag">${d.score}/${ruleCount} passed · ${d.failed.length} failed rules</span></div><h2>${esc(d.title)}</h2><div class="reader-meta">${esc(d.path)} · ${d.words} words · <a href="${esc(d.uri)}" target="_blank" rel="noopener">Source file</a>${original}</div><div class="reader-tabs"><button id="show-findings" aria-pressed="${state.view==='findings'}">Failing excerpts (${findings.length})</button><button id="show-reading" aria-pressed="${state.view==='reading'}">Read in context <kbd>v</kbd></button></div><div id="reader-body"></div>`;
+ $('show-findings').onclick=()=>{state.view='findings';renderReader()};$('show-reading').onclick=()=>{state.view='reading';renderReader()};
+ if(state.view==='findings'){
+  if(!findings.length){$('reader-body').innerHTML='<p class="empty">No failed checks. Read the document to judge whether this is useful prose or simply a small page.</p>';return;}
+  findings.forEach((f,i)=>{const el=document.createElement('section');el.className=`finding${i===state.finding?' selected':''}`;el.dataset.finding=i;el.innerHTML=`<h3>${f.rule}. ${esc(data.rules[f.rule])}</h3><div class="reason">Line ${f.line} · ${esc(f.reason)}</div><div class="quote">${esc(f.excerpt)}</div>`;el.append(button('Show in context',()=>{state.finding=i;state.view='reading';renderReader();scrollFinding()}));$('reader-body').append(el)});
+ }else{
+  d.blocks.forEach(b=>{const failures=[...new Set(findings.filter(f=>f.line>=b.line&&f.line<=b.end).map(f=>f.rule))],flagged=failures.length>0;const el=document.createElement('div');el.className=`reading-block${flagged?' flagged':''}`;el.dataset.line=b.line;el.dataset.end=b.end;el.innerHTML=`${flagged?`<div class="failure-label">${failures.map(id=>esc(data.rules[id])).join(' · ')}</div>`:''}${b.kind.startsWith('h')?`<h3>${esc(b.text)}</h3>`:esc(b.text)}`;$('reader-body').append(el)});
+ }
+}
+function scrollFinding(){const d=shown.find(d=>d.path===state.selected),f=d&&activeFindings(d)[state.finding];if(!f)return;if(state.view==='findings')document.querySelector(`[data-finding="${state.finding}"]`)?.scrollIntoView({block:'nearest'});else [...document.querySelectorAll('.reading-block')].find(b=>+b.dataset.line<=f.line&&+b.dataset.end>=f.line)?.scrollIntoView({block:'center'});}
+function reset(){state.score=null;state.rule=null;$('search').value='';for(const el of document.querySelectorAll('#group-options input'))el.checked=true;updateGroupLabel();$('length').value='0';render()}
+$('search').oninput=()=>{state.score=null;state.rule=null;render()};for(const id of ['length'])$(id).onchange=()=>{state.score=null;state.rule=null;render()};
+$('reset').onclick=reset;$('all-scores').onclick=()=>{state.score=null;render()};$('clear-rule').onclick=()=>{state.rule=null;state.score=null;render()};$('help').onclick=()=>$('shortcuts').showModal();$('close-help').onclick=()=>$('shortcuts').close();
+document.addEventListener('keydown',e=>{
+ if(e.metaKey||e.ctrlKey||e.altKey)return;
+ if($('shortcuts').open)return;
+ if(e.key==='Escape'){e.preventDefault();document.activeElement.blur();reset();return;}
+ if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName))return;
+ if(e.key==='/'){e.preventDefault();$('search').focus();return;}
+ if(e.key==='?'){e.preventDefault();$('shortcuts').showModal();return;}
+ if(['j','k','ArrowDown','ArrowUp'].includes(e.key)){e.preventDefault();const i=shown.findIndex(d=>d.path===state.selected),next=shown[Math.max(0,Math.min(shown.length-1,i+(['j','ArrowDown'].includes(e.key)?1:-1)))];if(next)selectDoc(next.path);}
+ if(['ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();const scores=[...new Set(base.filter(d=>matchesRule(d)).map(d=>d.score))].sort((a,b)=>a-b);if(!scores.length)return;const i=state.score===null?(e.key==='ArrowRight'?-1:scores.length):scores.indexOf(state.score);state.score=scores[Math.max(0,Math.min(scores.length-1,i+(e.key==='ArrowRight'?1:-1)))];render();}
+ if(['[',']'].includes(e.key)){e.preventDefault();const d=shown.find(d=>d.path===state.selected);if(!d)return;state.finding=Math.max(0,Math.min(activeFindings(d).length-1,state.finding+(e.key===']'?1:-1)));renderReader();scrollFinding();}
+ if(e.key==='v'){e.preventDefault();state.view=state.view==='reading'?'findings':'reading';renderReader();scrollFinding();}
+});
+$('footer').textContent=`Private local snapshot · ${data.generated} · Beginner rubric · Rebuild with uv run scripts/explore.py --open · Word counts exclude quotations and reference sections.`;
+function updateGroupLabel(){const all=[...document.querySelectorAll('#group-options input')],selected=all.filter(el=>el.checked);$('collection-label').textContent=selected.length===all.length?'All document types':selected.length===1?selected[0].value:`${selected.length} document types`;}
+function changeGroups(){state.score=null;state.rule=null;state.negate=false;updateGroupLabel();render();}
+for(const group of [...new Set(data.documents.map(d=>d.group))].sort()){const label=document.createElement('label'),input=document.createElement('input');input.type='checkbox';input.value=group;input.checked=true;input.onchange=changeGroups;label.append(input,document.createTextNode(group));$('group-options').append(label);}
+for(const [id,predicate] of [['all',()=>true],['none',()=>false],['references',group=>data.documents.some(d=>d.group===group&&d.reference)],['own',group=>data.documents.some(d=>d.group===group&&!d.reference)]])$('groups-'+id).onclick=()=>{for(const input of document.querySelectorAll('#group-options input'))input.checked=predicate(input.value);changeGroups();};
+
+render();
+</script>
+</html>
